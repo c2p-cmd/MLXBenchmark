@@ -1,0 +1,49 @@
+---
+config:
+  layout: elk
+---
+flowchart LR
+ subgraph subGraph0["A. Project Inputs"]
+        Data["Credit Card Customer Data<br>(Features: Financial, Behavioral)"]
+        GroundTruth["Hidden Churn Labels<br>(Attrition_Flag)"]
+  end
+ subgraph subGraph1["B. Experimental Processes (Frameworks & Algorithms)"]
+        MLX["MLX"]
+        Frameworks["ML Frameworks"]
+        Numpy["Numpy"]
+        Sklearn["scikit-learn"]
+  end
+ subgraph subGraph2["C. Outputs & Evaluation"]
+        ClusterAssignments["Cluster Assignments"]
+        PerformanceMetrics["Computational Metrics<br>(Runtime, Memory)"]
+        BusinessInsights["Interpretable Clusters &amp;<br>Churn Rates per Cluster"]
+  end
+ subgraph subGraph3["D. Hypotheses & Outcomes"]
+        H1["H1: Methodological & Business Efficacy"]
+        H2["H2: Computational Performance"]
+        ExpectedOutcome1["Insight into unsupervised churn structure"]
+        ExpectedOutcome2["MLX performance &amp; usability benchmark"]
+        ExpectedOutcome3["Practical recommendations"]
+  end
+    Data -- Preprocessed Features --> Frameworks
+    Frameworks ---> subGraph2
+    ClusterAssignments --- H1
+    GroundTruth --- H1
+    H1 --> BusinessInsights & ExpectedOutcome1 & ExpectedOutcome3
+    PerformanceMetrics --- H2
+    H2 --> ExpectedOutcome2
+    BusinessInsights --> ExpectedOutcome3
+    style Data fill:#DDF,stroke:#333,stroke-width:2px
+    style GroundTruth fill:#CFD,stroke:#333,stroke-width:2px
+    style MLX fill:#BFE,stroke:#333,stroke-width:2px
+    style Frameworks fill:#FDD,stroke:#333,stroke-width:2px
+    style Numpy fill:#FFD,stroke:#333,stroke-width:2px
+    style Sklearn fill:#FDC,stroke:#333,stroke-width:2px
+    style ClusterAssignments fill:#EEE,stroke:#333,stroke-width:2px
+    style PerformanceMetrics fill:#EEF,stroke:#333,stroke-width:2px
+    style BusinessInsights fill:#FEF,stroke:#333,stroke-width:2px
+    style H1 fill:#CFF,stroke:#333,stroke-width:2px
+    style H2 fill:#FFC,stroke:#333,stroke-width:2px
+    style ExpectedOutcome1 fill:#DFF,stroke:#333,stroke-width:2px
+    style ExpectedOutcome2 fill:#FFD,stroke:#333,stroke-width:2px
+    style ExpectedOutcome3 fill:#FDF,stroke:#333,stroke-width:2px
