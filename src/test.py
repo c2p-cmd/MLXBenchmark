@@ -8,6 +8,7 @@ from tqdm.auto import tqdm
 from sklearn.cluster import KMeans
 from utils.kmeans_numpy import KMeans_NP
 from utils.kmeans_mlx import KMeans_MLX
+from utils.kmeans_torch import KMeans_Torch
 from sklearn.decomposition import PCA
 
 import plotly.graph_objects as go
@@ -21,9 +22,9 @@ from sklearn.metrics import (
 from sklearn.datasets import fetch_openml
 
 # Configuration
-NUM_ROUNDS = 15  # Number of rounds to run
+NUM_ROUNDS = 20
 N_CLUSTERS = 10
-SAMPLE_SIZE = 5_000
+SAMPLE_SIZE = 7_500
 
 # Load and prepare data
 data = fetch_openml("mnist_784", as_frame=True)
@@ -65,26 +66,49 @@ def run_mlx_timed(X, n_clusters, random_state):
     return labels, elapsed
 
 
+def run_pytorch_timed(X, n_clusters, random_state):
+    start_time = time.time()
+    kmeans = KMeans_Torch(n_clusters=n_clusters, random_state=random_state)
+    labels = kmeans.fit_predict(X)
+    elapsed = time.time() - start_time
+    # print(f"PyTorch Device: {kmeans.device}")
+    return labels.cpu().numpy(), elapsed
+
+
 # Storage for results across rounds
 all_results = {
     "sklearn": {"times": [], "ari": [], "nmi": [], "silhouette": []},
     "numpy": {"times": [], "ari": [], "nmi": [], "silhouette": []},
     "mlx": {"times": [], "ari": [], "nmi": [], "silhouette": []},
+    "pytorch": {"times": [], "ari": [], "nmi": [], "silhouette": []},
 }
 
 # Store labels from last round for visualization
 last_labels = {}
 
 # Run multiple rounds
-for round_num in tqdm(range(NUM_ROUNDS), desc='Running tests...', unit='round'):
+for round_num in tqdm(range(NUM_ROUNDS), desc="Running tests...", unit="round"):
     # Run each implementation
     labels_sklearn, time_sklearn = run_sklearn_timed(
-        X, N_CLUSTERS, random_state=42 + round_num
+        X,
+        N_CLUSTERS,
+        random_state=44 + round_num,
     )
     labels_numpy, time_numpy = run_numpy_timed(
-        X, N_CLUSTERS, random_state=42 + round_num
+        X,
+        N_CLUSTERS,
+        random_state=44 + round_num,
     )
-    labels_mlx, time_mlx = run_mlx_timed(mlx_X, N_CLUSTERS, random_state=42 + round_num)
+    labels_mlx, time_mlx = run_mlx_timed(
+        mlx_X,
+        N_CLUSTERS,
+        random_state=44 + round_num,
+    )
+    labels_pytorch, time_pytorch = run_pytorch_timed(
+        X,
+        N_CLUSTERS,
+        random_state=44 + round_num,
+    )
 
     # Convert MLX array to numpy for metric calculations
     labels_mlx_np = np.array(labels_mlx)
@@ -107,12 +131,20 @@ for round_num in tqdm(range(NUM_ROUNDS), desc='Running tests...', unit='round'):
     all_results["mlx"]["nmi"].append(normalized_mutual_info_score(y, labels_mlx_np))
     all_results["mlx"]["silhouette"].append(silhouette_score(X, labels_mlx_np))
 
+    all_results["pytorch"]["times"].append(time_pytorch)
+    all_results["pytorch"]["ari"].append(adjusted_rand_score(y, labels_pytorch))
+    all_results["pytorch"]["nmi"].append(
+        normalized_mutual_info_score(y, labels_pytorch)
+    )
+    all_results["pytorch"]["silhouette"].append(silhouette_score(X, labels_pytorch))
+
     # Store last round labels for visualization
     if round_num == NUM_ROUNDS - 1:
         last_labels = {
             "sklearn": labels_sklearn,
             "numpy": labels_numpy,
             "mlx": labels_mlx,
+            "pytorch": labels_pytorch,
         }
 
 # Calculate average metrics
@@ -139,6 +171,12 @@ avg_metrics = {
         np.mean(all_results["mlx"]["silhouette"]),
         np.mean(all_results["mlx"]["times"]),
     ],
+    "pytorch": [
+        np.mean(all_results["pytorch"]["ari"]),
+        np.mean(all_results["pytorch"]["nmi"]),
+        np.mean(all_results["pytorch"]["silhouette"]),
+        np.mean(all_results["pytorch"]["times"]),
+    ],
 }
 
 std_metrics = {
@@ -160,6 +198,12 @@ std_metrics = {
         np.std(all_results["mlx"]["silhouette"]),
         np.std(all_results["mlx"]["times"]),
     ],
+    "pytorch": [
+        np.std(all_results["pytorch"]["ari"]),
+        np.std(all_results["pytorch"]["nmi"]),
+        np.std(all_results["pytorch"]["silhouette"]),
+        np.std(all_results["pytorch"]["times"]),
+    ],
 }
 
 df_metrics = pd.DataFrame(avg_metrics, index=["ARI", "NMI", "Silhouette", "Time (s)"])
@@ -174,6 +218,7 @@ print(df_std)
 labels_sklearn = last_labels["sklearn"]
 labels_numpy = last_labels["numpy"]
 labels_mlx = last_labels["mlx"]
+labels_pytorch = last_labels["pytorch"]
 
 # Apply PCA for visualization (reduce MNIST from 784D to 2D)
 pca = PCA(n_components=2, random_state=44)
@@ -181,7 +226,7 @@ X_pca = pca.fit_transform(X)
 
 # Create Plotly subplots layout
 fig = make_subplots(
-    rows=5,
+    rows=6,
     cols=1,
     subplot_titles=[
         f"Average Metrics Comparison (over {NUM_ROUNDS} rounds)",
@@ -189,10 +234,12 @@ fig = make_subplots(
         "KMeans (Scikit-Learn) - Last Round",
         "KMeans (NumPy) - Last Round",
         "KMeans (MLX) - Last Round",
+        "KMeans (PyTorch) - Last Round",
     ],
     specs=[
         [{"type": "table"}],
         [{"type": "table"}],
+        [{"type": "scatter"}],
         [{"type": "scatter"}],
         [{"type": "scatter"}],
         [{"type": "scatter"}],
@@ -215,6 +262,7 @@ fig.add_trace(
                 df_metrics["sklearn"].round(4),
                 df_metrics["numpy"].round(4),
                 df_metrics["mlx"].round(4),
+                df_metrics["pytorch"].round(4),
             ],
             align="center",
             font=dict(size=11),
@@ -228,7 +276,7 @@ fig.add_trace(
 fig.add_trace(
     go.Table(
         header=dict(
-            values=["Metric (Std)", "Scikit-Learn", "NumPy", "MLX"],
+            values=["Metric (Std)", "Scikit-Learn", "NumPy", "MLX", "PyTorch"],
             fill_color="lightyellow",
             align="center",
             font=dict(size=12, color="black"),
@@ -239,6 +287,7 @@ fig.add_trace(
                 df_std["sklearn"].round(4),
                 df_std["numpy"].round(4),
                 df_std["mlx"].round(4),
+                df_std["pytorch"].round(4),
             ],
             align="center",
             font=dict(size=11),
@@ -296,6 +345,13 @@ add_cluster_scatter(
     labels_mlx,
     "MLX Clusters",
     5,
+)
+add_cluster_scatter(
+    fig,
+    X_pca,
+    labels_pytorch,
+    "PyTorch Clusters",
+    6,
 )
 
 fig.update_layout(
