@@ -156,19 +156,7 @@ X * mask[:, mx.newaxis]  # Broadcasting works as expected
 ### 4. Linear Algebra Operations
 
 ```python
-mx.linalg.norm()  # Same as np.linalg.norm()
+mx.linalg.norm() 
+# Same as
+np.linalg.norm()
 ```
-
----
-
-## Summary
-
-The main challenge in porting NumPy code to MLX is the **lack of boolean indexing** and some helper functions like `argwhere()`. This requires rethinking algorithms to use mask-based operations and broadcasting instead of direct filtering. However, MLX maintains good API compatibility for most mathematical operations, making the transition manageable once these key differences are understood.
-
-### Key Takeaways
-
-- ✅ Use mask-based operations instead of boolean indexing
-- ✅ Use `isinstance()` for type checking, not `type() is`
-- ✅ Use `mx.random.permutation()` instead of `np.random.choice()`
-- ✅ Leverage broadcasting and vectorized operations
-- ✅ Most mathematical functions have direct equivalents
