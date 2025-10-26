@@ -1,33 +1,22 @@
-Dataset Shape: X: (5000, 784), y: (5000,)
-Running 15 rounds of experiments...
+# Results
 
-Running tests...: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 15/15 [00:50<00:00,  3.34s/round]
+## Initial Test Result
 
-============================================================
-AVERAGE RESULTS ACROSS ALL ROUNDS
-============================================================
+Dataset Shape: X: (7500, 784), y: (7500,)
+Running 20 rounds of experiments...
+
+### AVERAGE RESULTS ACROSS ALL ROUNDS
 
 Mean Metrics:
-             sklearn     numpy       mlx
-ARI         0.364956  0.365663  0.377599
-NMI         0.487949  0.490334  0.496023
-Silhouette  0.061057  0.062214  0.062716
-Time (s)    0.121208  2.149903  0.612999
+             sklearn     numpy       mlx   pytorch
+ARI         0.370824  0.368586  0.377660  0.376219
+NMI         0.487760  0.489389  0.493728  0.495406
+Silhouette  0.059053  0.060935  0.063618  0.063425
+Time (s)    0.163333  2.777906  1.102932  0.605396
 
 Standard Deviation:
-             sklearn     numpy       mlx
-ARI         0.030296  0.019787  0.025926
-NMI         0.021063  0.014283  0.013703
-Silhouette  0.008590  0.006984  0.005691
-Time (s)    0.050568  0.961375  0.252413
-
-What These Numbers Indicate
-
-Clustering Quality:
-MLX shows slightly higher ARI and NMI than scikit-learn and NumPy across all rounds. These metrics measure label agreement and mutual information, so your MLX version’s slightly higher values indicate stable centroid updates and consistent cluster assignment under random initialization.
-
-Execution Time:
-The MLX run consistently completes faster than your NumPy baseline but slower than scikit-learn. This behavior is expected—scikit-learn’s KMeans uses optimized C code and OpenMP parallelism. MLX makes use of Apple Silicon acceleration (Metal / AMX units), so it achieves good gains from vectorized computation, but kernel-level I/O and memory transfer overheads still add time.​
-
-Silhouette Score:
-Your silhouette values suggest moderately distinct but overlapping clusters (typical for MNIST). The small differences between frameworks validate numerical equivalence.
+             sklearn     numpy       mlx   pytorch
+ARI         0.028960  0.023885  0.021521  0.023364
+NMI         0.017778  0.014492  0.011171  0.013058
+Silhouette  0.009398  0.008716  0.007861  0.008616
+Time (s)    0.086759  1.325928  0.825973  0.305303
