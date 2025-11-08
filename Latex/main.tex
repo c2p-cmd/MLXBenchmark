@@ -7,6 +7,8 @@
 \usepackage{amsmath} % For math formulas
 \usepackage{booktabs} % For professional tables
 \usepackage{graphicx} % For including images
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf}
 
 \newcommand{\monthyeardate}{\ifcase \month \or January\or February\or March\or %
 April\or May \or June\or July\or August\or September\or October\or November\or %
@@ -49,15 +51,24 @@ This paper addresses that gap by benchmarking one of the most ubiquitous unsuper
     \item \textbf{Methodological Efficacy (H1):} Do different frameworks (MLX, PyTorch, scikit-learn) produce clusters of equivalent quality? And can these unsupervised clusters find a latent structure that aligns with a real-world business metric (customer churn)?
     \item \textbf{Computational Performance (H2):} How does MLX compare to established baselines in terms of wall-clock speed and, critically, memory efficiency?
 \end{enumerate}
-This research contributes a rigorous, multi-framework benchmark that provides the first (to the my knowledge) clear performance and methodological analysis of K-Means on MLX, offering practical guidance to practitioners on Apple Silicon.
+This research contributes a rigorous, multi-framework benchmark that provides the first (to the best of my knowledge) clear performance and methodological analysis of K-Means on MLX, offering practical guidance to practitioners on Apple Silicon.
 
 \section{Methodology}
 The experimental design is based on a direct comparison of four frameworks, testing two hypotheses (H1, H2). Figure \ref{fig:conceptual-framework} illustrates the complete flow from inputs through experimental implementations to measured outcomes.
 
+\subsection{Experimental Environment}
+All experiments were conducted on an Apple M3 MacBook Pro (18GB unified memory, macOS 26.0) using:
+\begin{itemize}
+    \item \texttt{MLX} v0.29.3
+    \item \texttt{PyTorch} v2.9.0 (MPS backend)
+    \item \texttt{scikit-learn} v1.7.2
+    \item \texttt{NumPy} v2.3.4
+\end{itemize}
+
 \subsection{Conceptual Framework}
 Four distinct K-Means algorithms with identical logic were implemented:
 \begin{itemize}
-    \item \textbf{MLX:} Our test candidate, using the `mlx.core` API.
+    \item \textbf{MLX:} Our test candidate, using the \texttt{mlx.core} API.
     \item \textbf{PyTorch:} The primary GPU-accelerated baseline, using the Apple Metal Performance Shaders (MPS) backend.
     \item \textbf{Scikit-learn:} The industry-standard CPU baseline, which uses a highly optimized C/Cython backend.
     \item \textbf{NumPy:} A pure-Python/NumPy CPU implementation to serve as a non-optimized baseline.
@@ -77,7 +88,7 @@ All experiments were run on identical Apple Silicon hardware (e.g., M1/M2 Mac) t
     \item \textbf{Digits MNIST:} Used for preliminary testing and scaling analysis. A 7,500-sample subset with 784 features was utilized.
     \item \textbf{Credit Card Customers:} The primary dataset for final analysis. This dataset features $\approx$30,000 customer records and 23 behavioral/financial features (9 chosen for final analysis). The \texttt{default payment next month} was held out as the ground truth for validation.
 \end{itemize}
-All data was preprocessed using `StandardScaler`.
+All data was preprocessed using \texttt{StandardScaler}.
 
 \subsection{Evaluation Metrics}
 Two categories of results were measured:
@@ -90,16 +101,16 @@ Two categories of results were measured:
     \end{itemize}
     \item \textbf{Performance (H2)}
     \begin{itemize}
-        \item \textbf{Fit Time (Seconds):} Wall-clock time to run the `fit()` method, averaged over 20 rounds.
-        \item \textbf{Peak Memory (MB):} The peak memory usage recorded during the `fit()` process.
+        \item \textbf{Fit Time (Seconds):} Wall-clock time to run the \texttt{fit()} method.
+        \item \textbf{Peak Memory (MB):} The peak memory usage recorded during the \texttt{fit()} process.
     \end{itemize}
 \end{enumerate}
 
 \section{Implementation Challenges in MLX}
 Migrating a traditional algorithm like K-Means to MLX is non-trivial. Three main challenges were encountered:
 \begin{itemize}
-    \item \textbf{No Boolean Indexing:} MLX (at the time of writing) lacks direct support for NumPy's `X[labels == k]`. This required a work-around using mask-based operations to recalculate centroids.
-    \item \textbf{Limited Random API:} MLX does not have `np.random.choice`; therefore, `mx.random.permutation()` followed by a slice was used to achieve random centroid initialization.
+    \item \textbf{No Boolean Indexing:} MLX (at the time of writing) lacks direct support for NumPy's \texttt{X[labels == k]}. This required a work-around using mask-based operations to recalculate centroids.
+    \item \textbf{Limited Random API:} MLX does not have \texttt{np.random.choice}; therefore, \texttt{mx.random.permutation()} followed by a slice was used to achieve random centroid initialization.
     \item \textbf{Type System:} Explicit type checking and conversions are critical in MLX to ensure compatibility between arrays.
 \end{itemize}
 These challenges highlight MLX's current focus on array operations optimized for deep learning rather than general-purpose data manipulation.
@@ -110,7 +121,7 @@ The final experiment on the Credit Card Customer dataset yielded two significant
 \begin{figure*}[htbp]
     \centering
     \includegraphics[width=\textwidth]{../src/results/evaluation_metrics.png}
-    \caption{K-Means Implementation Comparison on Credit Card Data.}
+    \caption{Performance comparison of K-Means implementations across frameworks.}
     \label{fig:results-grid}
 \end{figure*}
 
@@ -125,7 +136,7 @@ However, the external metrics (ARI and NMI) were both near zero. This proves tha
 \centering
 \caption{Clustering Quality Results (H1)}
 \label{tab:h1-results}
-\begin{tabular}{@{}lrrr@{}}
+\begin{tabular}{@{}lccc@{}}
 \toprule
 Framework & ARI & NMI & Silhouette \\
 \midrule
@@ -141,12 +152,12 @@ NumPy & -0.03 & 0.01 & 0.52 \\
 The second hypothesis concerned performance. The results were nuanced and highly insightful.
 
 \textbf{Memory Efficiency (H2 Supported):}
-The most significant finding is MLX's exceptional memory efficiency. As shown in Table \ref{tab:h2-results}, MLX and PyTorch used $\approx$0.13MB of peak memory. This was \textbf{$\approx$34x less memory} than `scikit-learn` (4.40MB) and \textbf{$\approx$108x less memory} than the `NumPy` baseline (14.16MB). This strongly supports H2 and highlights the key advantage of modern frameworks leveraging unified memory.
+The most significant finding is MLX's exceptional memory efficiency. As shown in Table \ref{tab:h2-results}, MLX and PyTorch used $\approx$0.13MB of peak memory. This was \textbf{$\approx$34x less memory} than \texttt{scikit-learn} (4.40MB) and \textbf{$\approx$108x less memory} than the \texttt{NumPy} baseline (14.16MB). This strongly supports H2 and highlights the key advantage of modern frameworks leveraging unified memory.
 
 \textbf{Runtime (H2 Nuanced):}
-For this small dataset, `NumPy` (0.025s) and `MLX` (0.046s) were the fastest, as they have low overhead. The more complex frameworks, `scikit-learn` (0.247s) and `PyTorch` (0.165s), were slower due to their initialization costs.
+For this small dataset, \texttt{NumPy} (0.025s) and \texttt{MLX} (0.046s) were the fastest, as they have low overhead. The more complex frameworks, \texttt{scikit-learn} (0.247s) and \texttt{PyTorch} (0.165s), were slower due to their initialization costs.
 
-This finding, combined with preliminary MNIST tests (where `scikit-learn` was fastest), demonstrates that runtime is highly data-dependent. For small-scale tasks, lightweight frameworks like `MLX` offer a superb balance of speed and low overhead.
+This finding, combined with preliminary MNIST tests (where \texttt{scikit-learn} was fastest), demonstrates that runtime is highly data-dependent. For small-scale tasks, lightweight frameworks like \texttt{MLX} offer a superb balance of speed and low overhead.
 
 \begin{table}[htbp]
 \centering
@@ -170,14 +181,14 @@ NumPy & 0.025 & 14.16 \\
 The results provide two clear recommendations:
 \begin{enumerate}
     \item K-Means, while effective at finding a structure, should not be used as a proxy for churn prediction on this dataset. A high Silhouette Score does not guarantee business relevance.
-    \item For small-to-medium datasets on Apple Silicon where \textbf{memory efficiency is critical}, MLX is a better choice than `scikit-learn`. `sklearn`'s 30-40x higher memory footprint can be a significant liability in memory-constrained environments.
+    \item For small-to-medium datasets on Apple Silicon where \textbf{memory efficiency is critical}, MLX is a better choice than \texttt{scikit-learn}. \texttt{sklearn}'s 30-40x higher memory footprint can be a significant liability in memory-constrained environments.
 \end{enumerate}
 
 \subsection{For the Research Community}
 This work confirms that MLX is a viable, lightweight, and memory-efficient framework for classical ML algorithms, not just deep learning. It also highlights the critical need to validate unsupervised segments against external business outcomes, rather than relying solely on internal metrics like the Silhouette Score.
 
 \subsection{Future Work}
-Future work should expand this benchmark. First, a scaling analysis is needed to find the "crossover point" where MLX's GPU acceleration overtakes `scikit-learn`'s runtime on larger datasets. Second, this analysis should be extended to other classical algorithms like DBSCAN, PCA, and SVMs.
+Future work should expand this benchmark. First, a scaling analysis is needed to find the "crossover point" where MLX's GPU acceleration overtakes \texttt{scikit-learn}'s runtime on larger datasets. Second, this analysis should be extended to other classical algorithms like DBSCAN, PCA, and SVMs.
 
 \section{Conclusion}
 This paper presented a rigorous benchmark of K-Means across four frameworks on Apple Silicon. Two key findings were demonstrated: first, that the dominant unsupervised structure in the target dataset is not aligned with customer churn, and second, that MLX provides a compelling performance profile, offering best-in-class memory efficiency and competitive speed. This research fills a gap in the literature and confirms MLX's viability as a powerful tool for all forms of machine learning on Apple Silicon.
@@ -194,11 +205,15 @@ Awni Hannun, et al. (2024). \textit{MLX: Efficient and Flexible Machine Learning
 J. A. Hartigan and M. A. Wong (1979). "A K-Means Clustering Algorithm". \textit{Applied Statistics}. 28 (1): 100–108.
 
 \bibitem{credit-card-data}
-Kaggle (2020). \textit{Credit Card Customers}. \href{https://www.kaggle.com/datasets/sakshigoyal7/credit-card-customers}{https://kaggle.com/datasets/sakshigoyal7/credit-card-customers}
+Yeh, I-Cheng. "Default of Credit Card Clients." UCI Machine Learning Repository, 2009, \href{https://doi.org/10.24432/C55S3H.}{https://doi.org/10.24432/C55S3H.}
 
 \bibitem{sklearn}
 F. Pedregosa et al. (2011). "Scikit-learn: Machine Learning in Python". \textit{Journal of Machine Learning Research}. 12: 2825–2830.
 
 \end{thebibliography}
+
+\appendix
+\section{GitHub}
+\href{https://github.com/c2p-cmd/MLXBenchmark}{https://github.com/c2p-cmd/MLXBenchmark}
 
 \end{document}
