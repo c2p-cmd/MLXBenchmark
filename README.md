@@ -35,3 +35,13 @@ bash run_experiments.sh
 - Runtime performance
 - Memory efficiency
 - Clustering quality (ARI, NMI, Silhouette Score)
+
+## Conceptual Framework
+
+[File](./conceptual_framework.mermaid)
+
+![conceptual_framework](./Conceptual%20Framework-2025-11-08-185317.png)
+
+## Results
+
+![results](./src/results/evaluation_metrics.png)
