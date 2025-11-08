@@ -2,3 +2,10 @@ venv/*
 .DS_Store
 __pycache__/
 *.pyc
+*.aux
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.synctex
+*.synctex.gz
