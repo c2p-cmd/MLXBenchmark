@@ -7,43 +7,37 @@ flowchart LR
         Data["Credit Card Customer Data<br>(Features: Financial, Behavioral)"]
         GroundTruth["Hidden Churn Labels<br>(Attrition_Flag)"]
   end
- subgraph subGraph1["B. Experimental Processes (Frameworks & Algorithms)"]
+ subgraph subGraph1["B. Experimental Frameworks"]
         MLX["MLX"]
-        Frameworks["ML Frameworks"]
-        Numpy["Numpy"]
+        PyTorch["PyTorch (MPS)"]
         Sklearn["scikit-learn"]
+        Numpy["Numpy"]
   end
- subgraph subGraph2["C. Outputs & Evaluation"]
-        ClusterAssignments["Cluster Assignments"]
-        PerformanceMetrics["Computational Metrics<br>(Runtime, Memory)"]
-        BusinessInsights["Interpretable Clusters &amp;<br>Churn Rates per Cluster"]
+ subgraph subGraph2["C. Measured Outputs"]
+        PerfMetrics["Computational Metrics<br>(Runtime, Memory)"]
+        ClusterMetrics["Clustering Quality Metrics<br>(ARI, NMI, Silhouette)"]
   end
  subgraph subGraph3["D. Hypotheses & Outcomes"]
-        H1["H1: Methodological & Business Efficacy"]
-        H2["H2: Computational Performance"]
-        ExpectedOutcome1["Insight into unsupervised churn structure"]
-        ExpectedOutcome2["MLX performance &amp; usability benchmark"]
-        ExpectedOutcome3["Practical recommendations"]
+        H1["H1: Methodological Efficacy<br>(Clustering Quality)"]
+        H2["H2: Computational Performance<br>(Speed &amp; Memory)"]
+        Outcomes["Final Insights &amp;<br>Recommendations"]
   end
-    Data -- Preprocessed Features --> Frameworks
-    Frameworks ---> subGraph2
-    ClusterAssignments --- H1
-    GroundTruth --- H1
-    H1 --> BusinessInsights & ExpectedOutcome1 & ExpectedOutcome3
-    PerformanceMetrics --- H2
-    H2 --> ExpectedOutcome2
-    BusinessInsights --> ExpectedOutcome3
+    Data --> subGraph1
+    subGraph1 L_subGraph1_subGraph2_0@--> subGraph2
+    ClusterMetrics --> H1
+    GroundTruth --> H1
+    PerfMetrics --> H2
+    H1 --> Outcomes
+    H2 --> Outcomes
     style Data fill:#DDF,stroke:#333,stroke-width:2px
     style GroundTruth fill:#CFD,stroke:#333,stroke-width:2px
     style MLX fill:#BFE,stroke:#333,stroke-width:2px
-    style Frameworks fill:#FDD,stroke:#333,stroke-width:2px
-    style Numpy fill:#FFD,stroke:#333,stroke-width:2px
+    style PyTorch fill:#FFD,stroke:#333,stroke-width:2px
     style Sklearn fill:#FDC,stroke:#333,stroke-width:2px
-    style ClusterAssignments fill:#EEE,stroke:#333,stroke-width:2px
-    style PerformanceMetrics fill:#EEF,stroke:#333,stroke-width:2px
-    style BusinessInsights fill:#FEF,stroke:#333,stroke-width:2px
+    style Numpy fill:#FDB,stroke:#333,stroke-width:2px
+    style PerfMetrics fill:#EEF,stroke:#333,stroke-width:2px
+    style ClusterMetrics fill:#EEE,stroke:#333,stroke-width:2px
     style H1 fill:#CFF,stroke:#333,stroke-width:2px
     style H2 fill:#FFC,stroke:#333,stroke-width:2px
-    style ExpectedOutcome1 fill:#DFF,stroke:#333,stroke-width:2px
-    style ExpectedOutcome2 fill:#FFD,stroke:#333,stroke-width:2px
-    style ExpectedOutcome3 fill:#FDF,stroke:#333,stroke-width:2px
+    style Outcomes fill:#EFE,stroke:#333,stroke-width:2px
+    L_subGraph1_subGraph2_0@{ animation: none }
