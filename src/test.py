@@ -207,6 +207,7 @@ std_metrics = {
 }
 
 df_metrics = pd.DataFrame(avg_metrics, index=["ARI", "NMI", "Silhouette", "Time (s)"])
+df_metrics.to_csv("./results/mnist_results.csv")
 df_std = pd.DataFrame(std_metrics, index=["ARI", "NMI", "Silhouette", "Time (s)"])
 
 print("\nMean Metrics:")
