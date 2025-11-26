@@ -9,3 +9,5 @@ __pycache__/
 *.out
 *.synctex
 *.synctex.gz
+*.bbl
+*.blg
